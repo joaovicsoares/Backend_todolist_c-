@@ -26,13 +26,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
-// builder.Services.AddEndpointsApiExplorer();
-// builder.Services.AddSwaggerGen();
 builder.Services.AddOpenApi(); 
 
 var app = builder.Build();
-// app.UseSwagger();
-// app.UseSwaggerUI();
+
 
 app.UseAuthentication();
 app.UseAuthorization();
