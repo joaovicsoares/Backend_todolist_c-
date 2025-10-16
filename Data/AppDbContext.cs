@@ -9,6 +9,8 @@ public class AppDbContext : DbContext
 
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Tarefa> Tarefas { get; set; }
+    public DbSet<Lista> Listas { get; set; }
+    public DbSet<ListaUsuario> ListaUsuarios { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,6 +30,20 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Titulo).HasColumnName("titulo");
             entity.Property(e => e.Concluida).HasColumnName("concluida");
+        });
+
+        modelBuilder.Entity<Lista>(entity =>
+        {
+            entity.ToTable("listas");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Nome).HasColumnName("nome");
+        });
+
+        modelBuilder.Entity<ListaUsuario>(entity =>
+        {
+            entity.ToTable("lista_usuario");
+            entity.Property(e => e.IdUsuario).HasColumnName("idusuario");
+            entity.Property(e => e.IdLista).HasColumnName("idlista");
         });
     }
 }
