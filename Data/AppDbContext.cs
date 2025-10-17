@@ -42,8 +42,13 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ListaUsuario>(entity =>
         {
             entity.ToTable("lista_usuario");
+            entity.HasKey(lu => new { lu.IdLista, lu.IdUsuario });
             entity.Property(e => e.IdUsuario).HasColumnName("idusuario");
             entity.Property(e => e.IdLista).HasColumnName("idlista");
+
+            entity.HasOne(lu => lu.Lista).WithMany(u => u.ListaUsuarios).HasForeignKey(lu => lu.IdLista);
+            entity.HasOne(lu => lu.Usuario).WithMany(u => u.ListaUsuarios).HasForeignKey(lu => lu.IdUsuario);
         });
+        base.OnModelCreating(modelBuilder);
     }
 }
