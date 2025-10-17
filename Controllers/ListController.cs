@@ -25,6 +25,12 @@ public class ListController : ControllerBase
         return int.Parse(claim.Value);
     }
 
+    private bool AcessoLista(int idLista)
+    {
+        var usuarioId = GetUsuarioId();
+        return _context.ListaUsuarios.Any(lu => lu.IdLista == idLista && lu.IdUsuario == usuarioId);
+    }
+
     [HttpGet]
     public IActionResult GetListas()
     {
@@ -75,9 +81,7 @@ public class ListController : ControllerBase
     {
         try
         {
-            var usuarioId = GetUsuarioId();
-            var associacao = _context.ListaUsuarios.FirstOrDefault(lu => lu.IdLista == id && lu.IdUsuario == usuarioId);
-            if (associacao == null)
+            if (!AcessoLista(id))
             {
                 return Forbid("Voce não tem permissão para deletar essa lista");
             }
@@ -105,9 +109,7 @@ public class ListController : ControllerBase
         }
         try
         {
-            var usuarioId = GetUsuarioId();
-            var associacao = _context.ListaUsuarios.FirstOrDefault(lu => lu.IdUsuario == usuarioId && lu.IdLista == id);
-            if (associacao == null)
+            if (!AcessoLista(id))
             {
                 return Forbid("Voce não tem permissão para atualizar esta lista");
             }
