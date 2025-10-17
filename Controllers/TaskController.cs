@@ -17,12 +17,26 @@ public class TaskController : ControllerBase
     {
         _context = context;
     }
-    [HttpGet("{id}")]
-    public IActionResult GetTarefas(int id)
+
+    private int GetUsuarioId()
+    {
+        var claim = User.Claims.FirstOrDefault(c => c.Type == "id");
+        return int.Parse(claim.Value);
+    }
+
+    private bool AcessoLista(int idLista)
+    {
+        var usuarioId = GetUsuarioId();
+        return _context.ListaUsuarios.Any(lu => lu.IdLista == idLista && lu.IdUsuario == usuarioId);
+    }
+
+
+    [HttpGet("{idLista}")]
+    public IActionResult GetTarefas(int idLista)
     {
         try
         {
-            var tarefas = _context.Tarefas.Where(t => t.IdLista == id).ToList();
+            var tarefas = _context.Tarefas.Where(t => t.IdLista == idLista).ToList();
             return Ok(tarefas);
         }
         catch (Exception ex)
@@ -32,15 +46,19 @@ public class TaskController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult CreateTarefa([FromBody] int idlista, Tarefa novaTarefa)
+    public IActionResult CreateTarefa([FromBody] Tarefa novaTarefa)
     {
+        if (!AcessoLista(novaTarefa.IdLista))
+        {
+            return Forbid("Você não tem acesso para adicionar tarefas a esta lista");
+        }
         if (string.IsNullOrEmpty(novaTarefa.Titulo))
         {
             return BadRequest("O titulo da tarefa não pode estar vazio");
         }
         try
         {
-            var tarefa = new Tarefa { Titulo = novaTarefa.Titulo, IdLista = idlista };
+            var tarefa = new Tarefa { Titulo = novaTarefa.Titulo, IdLista = novaTarefa.IdLista };
             _context.Tarefas.Add(tarefa);
             _context.SaveChanges();
             return CreatedAtAction(nameof(GetTarefas), new { id = tarefa.Id }, tarefa);
@@ -61,6 +79,10 @@ public class TaskController : ControllerBase
             {
                 return NotFound(new { message = "Tarefa não encontrada" });
             }
+            if (!AcessoLista(tarefa.IdLista))
+            {
+                return Forbid("Voce não tem permissão para deletar tarefas desta lista");
+            }
             _context.Tarefas.Remove(tarefa);
             _context.SaveChanges();
             return NoContent();
@@ -80,6 +102,10 @@ public class TaskController : ControllerBase
             if (tarefa == null)
             {
                 return NotFound(new { message = "Tarefa não encontrada" });
+            }
+            if (!AcessoLista(tarefa.IdLista))
+            {
+                return Forbid("Voce não tem permissão para atualizar tarefas desta lista");
             }
 
             tarefa.Concluida = novosDados.Concluida;
