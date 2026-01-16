@@ -43,10 +43,10 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public IActionResult Login([FromBody] Usuario dados)
+    public IActionResult Login([FromBody] LoginDto usuarioDto)
     {
-        var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == dados.Email);
-        if (usuario == null || !BCrypt.Net.BCrypt.Verify(dados.Senha, usuario.Senha))
+        var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == usuarioDto.Email);
+        if (usuario == null || !BCrypt.Net.BCrypt.Verify(usuarioDto.Senha, usuario.Senha))
             return BadRequest(new { message = "Email ou senha inválidos." });
 
         var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);

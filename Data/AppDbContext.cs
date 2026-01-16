@@ -30,6 +30,7 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Titulo).HasColumnName("titulo");
             entity.Property(e => e.Concluida).HasColumnName("concluida");
+            entity.Property(e => e.IdLista).HasColumnName("idlista");
         });
 
         modelBuilder.Entity<Lista>(entity =>

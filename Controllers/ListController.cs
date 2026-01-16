@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Servidor.Data;
 using Servidor.Models;
+using Servidor.Dtos.List;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,7 +38,14 @@ public class ListController : ControllerBase
         try
         {
             var usuarioId = GetUsuarioId();
-            var listas = _context.Listas.Where(l => l.ListaUsuarios.Any(lu => lu.IdUsuario == usuarioId)).ToList();
+            var listas = _context.Listas
+                .Where(l => l.ListaUsuarios.Any(lu => lu.IdUsuario == usuarioId))
+                .Select(l => new ListResponseDto
+                {
+                    Id = l.Id,
+                    Nome = l.Nome
+                })
+                .ToList();
             return Ok(listas);
         }
         catch (Exception ex)
@@ -47,16 +55,16 @@ public class ListController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult CreateLista([FromBody] Lista novaLista)
+    public IActionResult CreateLista([FromBody] ListDto novaListaDto)
     {
-        if (string.IsNullOrEmpty(novaLista.Nome))
+        if (string.IsNullOrEmpty(novaListaDto.Nome))
         {
             return BadRequest(new { message = "O nome da lista é obrigatorio" });
         }
         try
         {
             var usuarioId = GetUsuarioId();
-            var lista = new Lista { Nome = novaLista.Nome };
+            var lista = new Lista { Nome = novaListaDto.Nome };
             _context.Listas.Add(lista);
             _context.SaveChanges();
 
@@ -68,7 +76,13 @@ public class ListController : ControllerBase
             _context.ListaUsuarios.Add(associacao);
             _context.SaveChanges();
 
-            return CreatedAtAction(nameof(GetListas), new { id = lista.Id }, lista);
+            var response = new ListResponseDto
+            {
+                Id = lista.Id,
+                Nome = lista.Nome
+            };
+
+            return CreatedAtAction(nameof(GetListas), new { id = lista.Id }, response);
         }
         catch (Exception ex)
         {
@@ -101,7 +115,7 @@ public class ListController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public IActionResult UpdateLista(int id, [FromBody]  Lista dadosUpdate)
+    public IActionResult UpdateLista(int id, [FromBody] ListDto dadosUpdate)
     {
         if (string.IsNullOrEmpty(dadosUpdate.Nome))
         {
@@ -120,7 +134,14 @@ public class ListController : ControllerBase
             }
             lista.Nome = dadosUpdate.Nome;
             _context.SaveChanges();
-            return Ok(lista);
+            
+            var response = new ListResponseDto
+            {
+                Id = lista.Id,
+                Nome = lista.Nome
+            };
+            
+            return Ok(response);
         }
         catch (Exception ex)
         {
