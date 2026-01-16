@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Servidor.Data;
 using Servidor.Models;
+using Servidor.Dtos.Auth;
 using BCrypt.Net;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -23,12 +24,18 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("signup")]
-    public IActionResult Signup([FromBody] Usuario usuario)
+    public IActionResult Signup([FromBody] SignupDto usuarioDto)
     {
-        if (string.IsNullOrEmpty(usuario.Nome) || string.IsNullOrEmpty(usuario.Email) || string.IsNullOrEmpty(usuario.Senha))
+        if (string.IsNullOrEmpty(usuarioDto.Nome) || string.IsNullOrEmpty(usuarioDto.Email) || string.IsNullOrEmpty(usuarioDto.Senha))
             return BadRequest(new { message = "Todos os campos são obrigatórios." });
 
-        usuario.Senha = BCrypt.Net.BCrypt.HashPassword(usuario.Senha);
+            var usuario = new Usuario
+            {
+                Nome = usuarioDto.Nome,
+                Email = usuarioDto.Email,
+                Senha = BCrypt.Net.BCrypt.HashPassword(usuarioDto.Senha)
+            };
+            
         _context.Usuarios.Add(usuario);
         _context.SaveChanges();
 
