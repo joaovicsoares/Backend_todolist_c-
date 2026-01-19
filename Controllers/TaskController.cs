@@ -61,7 +61,7 @@ public class TaskController : ControllerBase
             var tarefa = new Tarefa { Titulo = novaTarefa.Titulo, IdLista = novaTarefa.IdLista };
             _context.Tarefas.Add(tarefa);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetTarefas), new { id = tarefa.Id }, tarefa);
+            return CreatedAtAction(nameof(GetTarefas), new { idLista = tarefa.IdLista }, tarefa);
         }
         catch (Exception ex)
         {
